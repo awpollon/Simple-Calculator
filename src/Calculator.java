@@ -33,6 +33,7 @@ public class Calculator implements ActionListener {
 
 	JButton enter;
 	JButton clear;
+	JButton decimal;
 
 	JTextArea out;
 	JPanel digPanel;
@@ -62,12 +63,15 @@ public class Calculator implements ActionListener {
 		mult.addActionListener(this);
 		mod = new JButton("%");
 		mod.addActionListener(this);
-
+		decimal = new JButton(".");
+		decimal.addActionListener(this);
+		
 		opsPanel.add(add);
 		opsPanel.add(sub);
 		opsPanel.add(div);
 		opsPanel.add(mult);
 		opsPanel.add(mod);
+		opsPanel.add(decimal);
 
 
 		frame.setVisible(true);
@@ -138,6 +142,10 @@ public class Calculator implements ActionListener {
 		else if (e.getSource() == enter) {
 			out.setText("" + enter());
 		}
+		else if (e.getSource() == decimal) {
+			input.add(-6);
+			out.setText(".");
+		}
 		else {
 			for(int i=0; i<digits.length; i++){
 				if (e.getSource() == digits[i]) {
@@ -153,25 +161,30 @@ public class Calculator implements ActionListener {
 
 	private double enter() {
 		//Check for no input or op first
-		if(input.isEmpty() || input.peek() < 0) {
+		if(input.isEmpty() || (input.peek() < 0 && input.peek() != -6)) {
 			out.setText("0");
 			return 0;
 		}
-		//Check for only one digit
+		//Check for only one input
 		else if (input.size() == 1) {
-			if (input.peek() > 0) out.setText("" + input.remove());
-			return 0;
+			if (input.peek() > 0) { 
+				out.setText("" + input.peek());
+				return input.remove();
+			}
+			else return 0;
 		}
 		else {
 			boolean hasOp = false;
+			boolean hasDec = false;
 			double num1 = 0;
 			double num2 = 0;
-			while(hasOp == false){
+			while(hasOp == false && hasDec == false){
 				num1 = num1*10;
 				num1 += (double) input.remove();
 				//If no more input, return the only number entered
 				if(input.isEmpty()) return num1;
 				//Check if op next
+				else if (input.peek() == -6 ) hasDec = true;
 				else if(input.peek() < 0) hasOp = true;
 			}
 			while(!input.isEmpty()) {
