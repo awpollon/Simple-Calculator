@@ -65,7 +65,7 @@ public class Calculator implements ActionListener {
 		mod.addActionListener(this);
 		decimal = new JButton(".");
 		decimal.addActionListener(this);
-		
+
 		opsPanel.add(add);
 		opsPanel.add(sub);
 		opsPanel.add(div);
@@ -144,7 +144,7 @@ public class Calculator implements ActionListener {
 		}
 		else if (e.getSource() == decimal) {
 			input.add(-6);
-			out.setText(".");
+			out.append(".");
 		}
 		else {
 			for(int i=0; i<digits.length; i++){
@@ -176,32 +176,64 @@ public class Calculator implements ActionListener {
 		else {
 			boolean hasOp = false;
 			boolean hasDec = false;
+			int decDeg = 0;
 			double num1 = 0;
 			double num2 = 0;
-			while(hasOp == false && hasDec == false){
-				num1 = num1*10;
-				num1 += (double) input.remove();
+			while(hasOp == false) {
+				if(hasDec) {
+					decDeg++;
+					num1 += (double) input.remove() /(Math.pow(10, decDeg));
+				}
+				else{
+					num1 = num1*10;
+					num1 += (double) input.remove();
+				}
 				//If no more input, return the only number entered
 				if(input.isEmpty()) return num1;
 				//Check if op next
-				else if (input.peek() == -6 ) hasDec = true;
+				else if (input.peek() == -6 ) {
+					hasDec = true;
+					input.remove();
+				}
 				else if(input.peek() < 0) hasOp = true;
 			}
-			while(!input.isEmpty()) {
+			while(!input.isEmpty()) {				
 				//Has op
 				int op = input.remove();
 				//Check for double ops
-				if (input.peek() < 0) {
+				if (input.peek() == -6) hasDec = true;
+				else if (input.peek() < 0) {
 					error();
 					return 0;
 				}
 				else {
 					hasOp = false;
 					num2 = 0;
+					decDeg = 0;
+					hasDec = false;
+					
 					while(hasOp == false) {
-						num2 = num2*10;
-						num2 += (double) input.remove();
+						//If has decimal, increment degree
+						if(hasDec) {
+							decDeg++;
+							num2 += (double) input.remove() /(Math.pow(10, decDeg));
+						}
+						//If no decimal, increment
+						else {
+							num2 = num2*10;
+							num2 += (double) input.remove();
+						}
 						if(input.isEmpty()) return calc(num1, num2, op);
+						else if(input.peek() == -6){
+							if(hasDec) {
+								error();
+								return 0;
+							}
+							else {
+								hasDec = true;
+								decDeg = 0;
+							}
+						}
 						else if(input.peek() < 0){
 							hasOp = true;
 							num1 = calc(num1, num2, op);
